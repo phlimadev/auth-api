@@ -2,7 +2,9 @@ package com.example.auth_api.services;
 
 import com.example.auth_api.dtos.LoginDTO;
 import com.example.auth_api.dtos.RegisterDTO;
+import com.example.auth_api.dtos.TokenDTO;
 import com.example.auth_api.entities.User;
+import com.example.auth_api.infra.security.TokenService;
 import com.example.auth_api.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,10 +18,16 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private TokenService tokenService;
 
-    public void login(LoginDTO data) {
+    public TokenDTO login(LoginDTO data) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
         var authentication = authenticationManager.authenticate(usernamePassword);
+
+        String token = tokenService.generateToken((User) authentication.getPrincipal());
+
+        return new TokenDTO(token);
     }
 
     public void register(RegisterDTO data) {
